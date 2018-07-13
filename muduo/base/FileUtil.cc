@@ -7,10 +7,8 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 //
 
-#include <muduo/base/FileUtil.h>
-#include <muduo/base/Logging.h> // strerror_tl
-
-#include <boost/static_assert.hpp>
+#include "FileUtil.h"
+#include "Logging.h" // strerror_tl
 
 #include <assert.h>
 #include <errno.h>
@@ -22,8 +20,8 @@
 using namespace muduo;
 
 FileUtil::AppendFile::AppendFile(StringArg filename)
-  : fp_(::fopen(filename.c_str(), "ae")),  // 'e' for O_CLOEXEC
-    writtenBytes_(0)
+  : fp_(::fopen(filename.c_str(), "ae")),  // The GNU C library allows extensions 'e' 
+    writtenBytes_(0) // (open with O_CLOEXEC flag) for mode
 {
   assert(fp_);
   ::setbuffer(fp_, buffer_, sizeof buffer_);
@@ -39,7 +37,7 @@ void FileUtil::AppendFile::append(const char* logline, const size_t len)
 {
   size_t n = write(logline, len);
   size_t remain = len - n;
-  while (remain > 0)
+  while (remain > 0) // interrupt
   {
     size_t x = write(logline + n, remain);
     if (x == 0)
@@ -54,19 +52,20 @@ void FileUtil::AppendFile::append(const char* logline, const size_t len)
     n += x;
     remain = len - n; // remain -= x
   }
-
+  
   writtenBytes_ += len;
 }
 
 void FileUtil::AppendFile::flush()
 {
-  ::fflush(fp_);
+  ::fflush(fp_); // flush a stream
 }
 
 size_t FileUtil::AppendFile::write(const char* logline, size_t len)
 {
   // #undef fwrite_unlocked
-  return ::fwrite_unlocked(logline, 1, len, fp_);
+  return ::fwrite_unlocked(logline, 1, len, fp_); // fwrite_unlocked() is similar to fwrite()
+  												  // except it is not thread-safe
 }
 
 FileUtil::ReadSmallFile::ReadSmallFile(StringArg filename)
@@ -88,6 +87,7 @@ FileUtil::ReadSmallFile::~ReadSmallFile()
   }
 }
 
+// read maxSize bytes from a file and write to destination pointed by content
 // return errno
 template<typename String>
 int FileUtil::ReadSmallFile::readToString(int maxSize,
@@ -96,7 +96,7 @@ int FileUtil::ReadSmallFile::readToString(int maxSize,
                                           int64_t* modifyTime,
                                           int64_t* createTime)
 {
-  BOOST_STATIC_ASSERT(sizeof(off_t) == 8);
+  static_assert(sizeof(off_t) == 8, "type off_t is too small"); // since c++11, typedef int64_t off_t
   assert(content != NULL);
   int err = err_;
   if (fd_ >= 0)
@@ -108,12 +108,12 @@ int FileUtil::ReadSmallFile::readToString(int maxSize,
       struct stat statbuf;
       if (::fstat(fd_, &statbuf) == 0)
       {
-        if (S_ISREG(statbuf.st_mode))
+        if (S_ISREG(statbuf.st_mode)) // regular file
         {
           *fileSize = statbuf.st_size;
-          content->reserve(static_cast<int>(std::min(implicit_cast<int64_t>(maxSize), *fileSize)));
+          content->reserve(static_cast<int>(std::min(static_cast<int64_t>(maxSize), *fileSize)));
         }
-        else if (S_ISDIR(statbuf.st_mode))
+        else if (S_ISDIR(statbuf.st_mode)) // directory file
         {
           err = EISDIR;
         }
@@ -132,9 +132,9 @@ int FileUtil::ReadSmallFile::readToString(int maxSize,
       }
     }
 
-    while (content->size() < implicit_cast<size_t>(maxSize))
+    while (content->size() < static_cast<size_t>(maxSize))
     {
-      size_t toRead = std::min(implicit_cast<size_t>(maxSize) - content->size(), sizeof(buf_));
+      size_t toRead = std::min(static_cast<size_t>(maxSize) - content->size(), sizeof(buf_));
       ssize_t n = ::read(fd_, buf_, toRead);
       if (n > 0)
       {
@@ -146,22 +146,23 @@ int FileUtil::ReadSmallFile::readToString(int maxSize,
         {
           err = errno;
         }
-        break;
+        break; // an error occurs
       }
     }
   }
   return err;
 }
 
+// read from a file and write to the internal buffer
 int FileUtil::ReadSmallFile::readToBuffer(int* size)
 {
   int err = err_;
   if (fd_ >= 0)
   {
-    ssize_t n = ::pread(fd_, buf_, sizeof(buf_)-1, 0);
-    if (n >= 0)
-    {
-      if (size)
+    ssize_t n = ::pread(fd_, buf_, sizeof(buf_)-1, 0); // pread() performs the same function
+    if (n >= 0)                                        // as read(), but reads from the specified
+    {												   // position in the file without modifying
+      if (size)                                        // the file pointer
       {
         *size = static_cast<int>(n);
       }
@@ -175,15 +176,9 @@ int FileUtil::ReadSmallFile::readToBuffer(int* size)
   return err;
 }
 
-template int FileUtil::readFile(StringArg filename,
-                                int maxSize,
-                                string* content,
-                                int64_t*, int64_t*, int64_t*);
-
-template int FileUtil::ReadSmallFile::readToString(
-    int maxSize,
-    string* content,
-    int64_t*, int64_t*, int64_t*);
+// instantiation
+template int FileUtil::readFile(StringArg filename, int maxSize, string* content, int64_t*, int64_t*, int64_t*);
+template int FileUtil::ReadSmallFile::readToString(int maxSize, string* content, int64_t*, int64_t*, int64_t*);
 
 #ifndef MUDUO_STD_STRING
 template int FileUtil::readFile(StringArg filename,
