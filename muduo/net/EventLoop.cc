@@ -7,16 +7,12 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/EventLoop.h>
-
 #include <muduo/base/Logging.h>
 #include <muduo/base/Mutex.h>
 #include <muduo/net/Channel.h>
 #include <muduo/net/Poller.h>
 #include <muduo/net/SocketsOps.h>
 #include <muduo/net/TimerQueue.h>
-
-#include <boost/bind.hpp>
-
 #include <signal.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
@@ -32,6 +28,9 @@ const int kPollTimeMs = 10000;
 
 int createEventfd()
 {
+  //eventfd() creates an "eventfd object" that can be used as an event
+  //wait/notify mechanism by user-space applications, and by the kernel  
+  //to notify user-space applications of events. 
   int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
   if (evtfd < 0)
   {
@@ -48,7 +47,7 @@ class IgnoreSigPipe
   IgnoreSigPipe()
   {
     ::signal(SIGPIPE, SIG_IGN);
-    // LOG_TRACE << "Ignore SIGPIPE";
+    //LOG_TRACE << "Ignore SIGPIPE";
   }
 };
 #pragma GCC diagnostic error "-Wold-style-cast"
@@ -85,7 +84,7 @@ EventLoop::EventLoop()
     t_loopInThisThread = this;
   }
   wakeupChannel_->setReadCallback(
-      boost::bind(&EventLoop::handleRead, this));
+      std::bind(&EventLoop::handleRead, this));
   // we are always reading the wakeupfd
   wakeupChannel_->enableReading();
 }

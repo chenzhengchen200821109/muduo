@@ -7,12 +7,9 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/EventLoopThreadPool.h>
-
 #include <muduo/net/EventLoop.h>
 #include <muduo/net/EventLoopThread.h>
-
 #include <boost/bind.hpp>
-
 #include <stdio.h>
 
 using namespace muduo;
@@ -44,9 +41,12 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
   {
     char buf[name_.size() + 32];
     snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
-    EventLoopThread* t = new EventLoopThread(cb, buf);
-    threads_.push_back(t);
-    loops_.push_back(t->startLoop());
+    //EventLoopThread* t = new EventLoopThread(cb, buf);
+    //threads_.push_back(t);
+    //loops_.push_back(t->startLoop());
+    std::unique_ptr<EventLoopThread> ptr(new EventLoopThread(cb, buf));
+    threads_.push_back(std::move(ptr));
+    loops_.push_back(ptr.get()->startLoop());
   }
   if (numThreads_ == 0 && cb)
   {

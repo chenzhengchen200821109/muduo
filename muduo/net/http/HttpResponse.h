@@ -11,9 +11,8 @@
 #ifndef MUDUO_NET_HTTP_HTTPRESPONSE_H
 #define MUDUO_NET_HTTP_HTTPRESPONSE_H
 
-#include <muduo/base/copyable.h>
+#include <muduo/base/Copyable.h>
 #include <muduo/base/Types.h>
-
 #include <map>
 
 namespace muduo

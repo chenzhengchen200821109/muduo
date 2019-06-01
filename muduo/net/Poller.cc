@@ -7,8 +7,8 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/Poller.h>
-
 #include <muduo/net/Channel.h>
+#include <muduo/base/Logging.h>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -16,10 +16,12 @@ using namespace muduo::net;
 Poller::Poller(EventLoop* loop)
   : ownerLoop_(loop)
 {
+  LOG_TRACE;
 }
 
 Poller::~Poller()
 {
+  LOG_TRACE;
 }
 
 bool Poller::hasChannel(Channel* channel) const
