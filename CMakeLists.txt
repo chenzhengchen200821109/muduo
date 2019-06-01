@@ -10,6 +10,7 @@ endif()
 
 set(CXX_FLAGS
  -g
+ -std=c++11
  # -DVALGRIND
  # -DMUDUO_STD_STRING
  -DCHECK_PTHREAD_RETURN_VALUE
