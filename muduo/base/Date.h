@@ -6,7 +6,7 @@
 #ifndef MUDUO_BASE_DATE_H
 #define MUDUO_BASE_DATE_H
 
-#include <muduo/base/copyable.h>
+#include <muduo/base/Copyable.h>
 #include <muduo/base/Types.h>
 
 struct tm;
@@ -21,8 +21,6 @@ namespace muduo
 /// It's recommended to pass it by value, since it's passed in register on x64.
 ///
 class Date : public muduo::copyable
-          // public boost::less_than_comparable<Date>,
-          // public boost::equality_comparable<Date>
 {
  public:
 
@@ -114,5 +112,5 @@ inline bool operator==(Date x, Date y)
   return x.julianDayNumber() == y.julianDayNumber();
 }
 
-}
+} //namespace muduo
 #endif  // MUDUO_BASE_DATE_H

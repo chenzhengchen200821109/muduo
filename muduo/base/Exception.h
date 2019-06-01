@@ -8,6 +8,7 @@
 
 #include <muduo/base/Types.h>
 #include <exception>
+#include <string>
 
 namespace muduo
 {
@@ -28,6 +29,6 @@ class Exception : public std::exception
   string stack_;
 };
 
-}
+} //namespace muduo
 
 #endif  // MUDUO_BASE_EXCEPTION_H

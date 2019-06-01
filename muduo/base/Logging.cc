@@ -1,13 +1,10 @@
 #include <muduo/base/Logging.h>
-
 #include <muduo/base/CurrentThread.h>
 #include <muduo/base/Timestamp.h>
 #include <muduo/base/TimeZone.h>
-
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <sstream>
 
 namespace muduo

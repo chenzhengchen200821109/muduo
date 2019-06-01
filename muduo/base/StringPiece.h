@@ -42,7 +42,6 @@
 
 #include <string.h>
 #include <iosfwd>    // for ostream forward-declaration
-
 #include "Types.h"
 #ifndef MUDUO_STD_STRING
 #include <string>

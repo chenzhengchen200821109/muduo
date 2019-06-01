@@ -1,7 +1,6 @@
 #include <muduo/base/AsyncLogging.h>
 #include <muduo/base/LogFile.h>
 #include <muduo/base/Timestamp.h>
-
 #include <stdio.h>
 
 using namespace muduo;
@@ -35,11 +34,11 @@ void AsyncLogging::append(const char* logline, int len)
   }
   else
   {
-    buffers_.push_back(currentBuffer_.release());
+    buffers_.push_back(std::move(currentBuffer_));
 
     if (nextBuffer_)
     {
-      currentBuffer_ = boost::ptr_container::move(nextBuffer_);
+      currentBuffer_ = std::move(nextBuffer_);
     }
     else
     {
@@ -73,12 +72,12 @@ void AsyncLogging::threadFunc()
       {
         cond_.waitForSeconds(flushInterval_);
       }
-      buffers_.push_back(currentBuffer_.release());
-      currentBuffer_ = boost::ptr_container::move(newBuffer1);
+      buffers_.push_back(std::move(currentBuffer_));
+      currentBuffer_ = std::move(newBuffer1);
       buffersToWrite.swap(buffers_);
       if (!nextBuffer_)
       {
-        nextBuffer_ = boost::ptr_container::move(newBuffer2);
+        nextBuffer_ = std::move(newBuffer2);
       }
     }
 
@@ -98,7 +97,7 @@ void AsyncLogging::threadFunc()
     for (size_t i = 0; i < buffersToWrite.size(); ++i)
     {
       // FIXME: use unbuffered stdio FILE ? or use ::writev ?
-      output.append(buffersToWrite[i].data(), buffersToWrite[i].length());
+      output.append(buffersToWrite[i].get()->data(), buffersToWrite[i].get()->length());
     }
 
     if (buffersToWrite.size() > 2)
@@ -110,14 +109,16 @@ void AsyncLogging::threadFunc()
     if (!newBuffer1)
     {
       assert(!buffersToWrite.empty());
-      newBuffer1 = buffersToWrite.pop_back();
+      newBuffer1 = std::move(buffersToWrite.back());
+      buffersToWrite.pop_back();
       newBuffer1->reset();
     }
 
     if (!newBuffer2)
     {
       assert(!buffersToWrite.empty());
-      newBuffer2 = buffersToWrite.pop_back();
+      newBuffer2 = std::move(buffersToWrite.back());
+      buffersToWrite.pop_back();
       newBuffer2->reset();
     }
 

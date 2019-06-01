@@ -8,13 +8,12 @@
 
 #include <muduo/base/Condition.h>
 #include <muduo/base/Mutex.h>
-
-#include <boost/noncopyable.hpp>
+#include <muduo/base/NonCopyable.h>
 
 namespace muduo
 {
 
-class CountDownLatch : boost::noncopyable
+class CountDownLatch : muduo::noncopyable
 {
  public:
 
@@ -32,5 +31,5 @@ class CountDownLatch : boost::noncopyable
   int count_;
 };
 
-}
+} //namespace muduo
 #endif  // MUDUO_BASE_COUNTDOWNLATCH_H

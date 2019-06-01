@@ -4,8 +4,6 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/base/Exception.h>
-
-//#include <cxxabi.h>
 #include <execinfo.h>
 #include <stdlib.h>
 

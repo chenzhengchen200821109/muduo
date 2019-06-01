@@ -7,11 +7,8 @@
 #include <muduo/base/CurrentThread.h>
 #include <muduo/base/Exception.h>
 #include <muduo/base/Logging.h>
-
-#include <boost/static_assert.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/weak_ptr.hpp>
-
+#include <type_traits>
+#include <memory>
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -28,8 +25,8 @@ namespace CurrentThread
   __thread char t_tidString[32];
   __thread int t_tidStringLength = 6;
   __thread const char* t_threadName = "unknown";
-  const bool sameType = boost::is_same<int, pid_t>::value;
-  BOOST_STATIC_ASSERT(sameType);
+  const bool sameType = std::is_same<int, pid_t>::value;
+  static_assert(sameType, "int and pid_t are not the same type");
 }
 
 namespace detail
@@ -55,6 +52,11 @@ class ThreadNameInitializer
   {
     muduo::CurrentThread::t_threadName = "main";
     CurrentThread::tid();
+    //
+    // int pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void));
+    // thre pthread_atfork() function shall declare fork handlers to be called before and
+    // after fork(), in the context of the thread that called the fork().
+    //
     pthread_atfork(NULL, NULL, &afterFork);
   }
 };
@@ -152,7 +154,7 @@ void CurrentThread::sleepUsec(int64_t usec)
   ::nanosleep(&ts, NULL);
 }
 
-AtomicInt32 Thread::numCreated_;
+std::atomic<int> Thread::numCreated_(0);
 
 Thread::Thread(const ThreadFunc& func, const string& n)
   : started_(false),
@@ -191,7 +193,8 @@ Thread::~Thread()
 
 void Thread::setDefaultName()
 {
-  int num = numCreated_.incrementAndGet();
+  //int num = numCreated_.incrementAndGet();
+  int num = std::atomic_fetch_add(&numCreated_, 1);
   if (name_.empty())
   {
     char buf[32];

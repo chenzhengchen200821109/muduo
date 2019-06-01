@@ -9,7 +9,6 @@
 
 #include "FileUtil.h"
 #include "Logging.h" // strerror_tl
-
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>

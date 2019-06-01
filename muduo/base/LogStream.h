@@ -8,7 +8,7 @@
 #ifndef MUDUO_STD_STRING
 #include <string>
 #endif
-#include <boost/noncopyable.hpp>
+#include <muduo/base/NonCopyable.h>
 
 namespace muduo
 {
@@ -20,7 +20,7 @@ const int kSmallBuffer = 4000;
 const int kLargeBuffer = 4000*1000;
 
 template<int SIZE>
-class FixedBuffer : boost::noncopyable
+class FixedBuffer : muduo::noncopyable
 {
  public:
   FixedBuffer()
@@ -75,7 +75,7 @@ class FixedBuffer : boost::noncopyable
 
 }
 
-class LogStream : boost::noncopyable
+class LogStream : muduo::noncopyable
 {
   typedef LogStream self;
  public:

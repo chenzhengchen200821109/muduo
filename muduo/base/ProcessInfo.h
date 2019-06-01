@@ -64,6 +64,6 @@ namespace ProcessInfo
   std::vector<pid_t> threads();
 }
 
-}
+} //namespace muduo
 
 #endif  // MUDUO_BASE_PROCESSINFO_H

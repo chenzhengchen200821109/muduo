@@ -1,15 +1,13 @@
 #include <muduo/base/TimeZone.h>
 #include <muduo/base/Date.h>
-
-#include <boost/noncopyable.hpp>
+#include <muduo/base/NonCopyable.h>
 #include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <vector>
-
+#include <assert.h>
 //#define _BSD_SOURCE
 #include <endian.h>
-
 #include <stdint.h>
 #include <stdio.h>
 #include <strings.h>
@@ -96,7 +94,7 @@ namespace muduo
 namespace detail
 {
 
-class File : boost::noncopyable
+class File : muduo::noncopyable
 {
  public:
   File(const char* file)

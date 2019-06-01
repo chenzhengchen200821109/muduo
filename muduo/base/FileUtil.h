@@ -77,7 +77,7 @@ namespace FileUtil
 	};
 }
 
-}
+} //namespace muduo
 
 #endif  // MUDUO_BASE_FILEUTIL_H
 

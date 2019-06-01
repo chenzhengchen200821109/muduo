@@ -8,34 +8,35 @@
 
 #include <muduo/base/Condition.h>
 #include <muduo/base/Mutex.h>
-
-#include <boost/circular_buffer.hpp>
-#include <boost/noncopyable.hpp>
+#include <deque>
+#include <muduo/base/NonCopyable.h>
 #include <assert.h>
+#include <stddef.h> 
 
 namespace muduo
 {
 
 template<typename T>
-class BoundedBlockingQueue : boost::noncopyable
+class BoundedBlockingQueue : muduo::noncopyable
 {
  public:
-  explicit BoundedBlockingQueue(int maxSize)
+  explicit BoundedBlockingQueue(size_t maxSize)
     : mutex_(),
       notEmpty_(mutex_),
       notFull_(mutex_),
-      queue_(maxSize)
+      queue_(),
+      maxSize_(maxSize)
   {
   }
 
   void put(const T& x)
   {
     MutexLockGuard lock(mutex_);
-    while (queue_.full())
+    while (queue_.size() == maxSize_)
     {
       notFull_.wait();
     }
-    assert(!queue_.full());
+    assert(!(queue_.size() == maxSize_));
     queue_.push_back(x);
     notEmpty_.notify();
   }
@@ -63,7 +64,7 @@ class BoundedBlockingQueue : boost::noncopyable
   bool full() const
   {
     MutexLockGuard lock(mutex_);
-    return queue_.full();
+    return queue_.size() == maxSize_;
   }
 
   size_t size() const
@@ -75,16 +76,17 @@ class BoundedBlockingQueue : boost::noncopyable
   size_t capacity() const
   {
     MutexLockGuard lock(mutex_);
-    return queue_.capacity();
+    return maxSize_;
   }
 
  private:
   mutable MutexLock          mutex_;
   Condition                  notEmpty_;
   Condition                  notFull_;
-  boost::circular_buffer<T>  queue_;
+  std::deque<T>              queue_;
+  size_t                        maxSize_;
 };
 
-}
+} //namespace muduo
 
 #endif  // MUDUO_BASE_BOUNDEDBLOCKINGQUEUE_H

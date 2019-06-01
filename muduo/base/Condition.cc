@@ -4,7 +4,6 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/base/Condition.h>
-
 #include <errno.h>
 
 // returns true if time out, false otherwise.

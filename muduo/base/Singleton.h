@@ -6,7 +6,7 @@
 #ifndef MUDUO_BASE_SINGLETON_H
 #define MUDUO_BASE_SINGLETON_H
 
-#include <boost/noncopyable.hpp>
+#include <muduo/base/NonCopyable.h>
 #include <assert.h>
 #include <stdlib.h> // atexit
 #include <pthread.h>
@@ -32,7 +32,7 @@ struct has_no_destroy
 }
 
 template<typename T>
-class Singleton : boost::noncopyable
+class Singleton : muduo::noncopyable
 {
  public:
   static T& instance()
@@ -75,6 +75,6 @@ pthread_once_t Singleton<T>::ponce_ = PTHREAD_ONCE_INIT;
 template<typename T>
 T* Singleton<T>::value_ = NULL;
 
-}
+} //namespace muduo
 #endif
 
