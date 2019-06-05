@@ -24,6 +24,7 @@ namespace net
 
 class EventLoop;
 
+//Create a loop thread.
 class EventLoopThread : muduo::noncopyable
 {
  public:

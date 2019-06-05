@@ -12,7 +12,7 @@
 #define MUDUO_NET_TIMER_H
 
 #include <muduo/base/NonCopyable.h>
-#include <muduo/base/Atomic.h>
+#include <atomic>
 #include <muduo/base/Timestamp.h>
 #include <muduo/net/Callbacks.h>
 
@@ -23,7 +23,7 @@ namespace net
 ///
 /// Internal class for timer event.
 ///
-class Timer : boost::noncopyable
+class Timer : muduo::noncopyable
 {
  public:
   Timer(const TimerCallback& cb, Timestamp when, double interval)
@@ -31,7 +31,7 @@ class Timer : boost::noncopyable
       expiration_(when),
       interval_(interval),
       repeat_(interval > 0.0),
-      sequence_(s_numCreated_.incrementAndGet())
+      sequence_(s_numCreated_.fetch_add(1))
   { }
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
@@ -40,7 +40,7 @@ class Timer : boost::noncopyable
       expiration_(when),
       interval_(interval),
       repeat_(interval > 0.0),
-      sequence_(s_numCreated_.incrementAndGet())
+      sequence_(s_numCreated_.fetch_add(1))
   { }
 #endif
 
@@ -55,7 +55,7 @@ class Timer : boost::noncopyable
 
   void restart(Timestamp now);
 
-  static int64_t numCreated() { return s_numCreated_.get(); }
+  static int64_t numCreated() { return s_numCreated_.load(); }
 
  private:
   const TimerCallback callback_;
@@ -63,9 +63,9 @@ class Timer : boost::noncopyable
   const double interval_;
   const bool repeat_;
   const int64_t sequence_;
-
-  static AtomicInt64 s_numCreated_;
+  static std::atomic<int64_t> s_numCreated_;
 };
-}
-}
+
+} //namespace net 
+} //namespace muduo
 #endif  // MUDUO_NET_TIMER_H

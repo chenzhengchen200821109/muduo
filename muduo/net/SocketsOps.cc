@@ -7,11 +7,9 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/SocketsOps.h>
-
 #include <muduo/base/Logging.h>
 #include <muduo/base/Types.h>
 #include <muduo/net/Endian.h>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>  // snprintf

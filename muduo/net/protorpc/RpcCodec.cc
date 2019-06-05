@@ -7,15 +7,11 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/protorpc/RpcCodec.h>
-
 #include <muduo/base/Logging.h>
 #include <muduo/net/Endian.h>
 #include <muduo/net/TcpConnection.h>
-
 #include <muduo/net/protorpc/rpc.pb.h>
 #include <muduo/net/protorpc/google-inl.h>
-
-#include <boost/bind.hpp>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -35,5 +31,5 @@ namespace muduo
 namespace net
 {
 const char rpctag [] = "RPC0";
-}
-}
+} //namespace net 
+} //namespace muduo

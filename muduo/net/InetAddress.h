@@ -13,7 +13,6 @@
 
 #include <muduo/base/Copyable.h>
 #include <muduo/base/StringPiece.h>
-
 #include <netinet/in.h>
 
 namespace muduo
@@ -77,7 +76,7 @@ class InetAddress : public muduo::copyable
   };
 };
 
-}
-}
+} //namespace net 
+} //namespace muduo
 
 #endif  // MUDUO_NET_INETADDRESS_H

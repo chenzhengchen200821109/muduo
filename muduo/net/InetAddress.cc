@@ -7,16 +7,12 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/InetAddress.h>
-
 #include <muduo/base/Logging.h>
 #include <muduo/net/Endian.h>
 #include <muduo/net/SocketsOps.h>
-
 #include <netdb.h>
 #include <strings.h>  // bzero
 #include <netinet/in.h>
-
-#include <boost/static_assert.hpp>
 
 // INADDR_ANY use (type)value casting.
 #pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -48,19 +44,19 @@ static const in_addr_t kInaddrLoopback = INADDR_LOOPBACK;
 using namespace muduo;
 using namespace muduo::net;
 
-BOOST_STATIC_ASSERT(sizeof(InetAddress) == sizeof(struct sockaddr_in6));
-BOOST_STATIC_ASSERT(offsetof(sockaddr_in, sin_family) == 0);
-BOOST_STATIC_ASSERT(offsetof(sockaddr_in6, sin6_family) == 0);
-BOOST_STATIC_ASSERT(offsetof(sockaddr_in, sin_port) == 2);
-BOOST_STATIC_ASSERT(offsetof(sockaddr_in6, sin6_port) == 2);
+static_assert(sizeof(InetAddress) == sizeof(struct sockaddr_in6), "");
+static_assert(offsetof(sockaddr_in, sin_family) == 0, "");
+static_assert(offsetof(sockaddr_in6, sin6_family) == 0, "");
+static_assert(offsetof(sockaddr_in, sin_port) == 2, "");
+static_assert(offsetof(sockaddr_in6, sin6_port) == 2, "");
 
 #if !(__GNUC_PREREQ (4,6))
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
 InetAddress::InetAddress(uint16_t port, bool loopbackOnly, bool ipv6)
 {
-  BOOST_STATIC_ASSERT(offsetof(InetAddress, addr6_) == 0);
-  BOOST_STATIC_ASSERT(offsetof(InetAddress, addr_) == 0);
+  static_assert(offsetof(InetAddress, addr6_) == 0, "");
+  static_assert(offsetof(InetAddress, addr_) == 0, "");
   if (ipv6)
   {
     bzero(&addr6_, sizeof addr6_);

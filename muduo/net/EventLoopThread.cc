@@ -8,7 +8,6 @@
 
 #include <muduo/net/EventLoopThread.h>
 #include <muduo/net/EventLoop.h>
-#include <functional>
 
 using namespace muduo;
 using namespace muduo::net;
@@ -68,7 +67,7 @@ void EventLoopThread::threadFunc()
     cond_.notify();
   }
 
-  loop.loop(); //
+  loop.loop(); // one loop per thread.
   //assert(exiting_);
   loop_ = NULL;
 }

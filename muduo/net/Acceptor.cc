@@ -7,14 +7,11 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/Acceptor.h>
-
 #include <muduo/base/Logging.h>
 #include <muduo/net/EventLoop.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/SocketsOps.h>
-
-#include <boost/bind.hpp>
-
+#include <functional>
 #include <errno.h>
 #include <fcntl.h>
 //#include <sys/types.h>
@@ -36,7 +33,7 @@ Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
   acceptSocket_.setReusePort(reuseport);
   acceptSocket_.bindAddress(listenAddr);
   acceptChannel_.setReadCallback(
-      boost::bind(&Acceptor::handleRead, this));
+      std::bind(&Acceptor::handleRead, this));
 }
 
 Acceptor::~Acceptor()

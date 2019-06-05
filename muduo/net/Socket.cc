@@ -7,11 +7,9 @@
 // Author: Shuo Chen (chenshuo at chenshuo dot com)
 
 #include <muduo/net/Socket.h>
-
 #include <muduo/base/Logging.h>
 #include <muduo/net/InetAddress.h>
 #include <muduo/net/SocketsOps.h>
-
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <strings.h>  // bzero

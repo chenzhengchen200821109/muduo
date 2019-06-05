@@ -9,9 +9,7 @@
 #include <muduo/base/Logging.h>
 #include <muduo/net/Channel.h>
 #include <muduo/net/EventLoop.h>
-
 #include <sstream>
-
 #include <poll.h>
 
 using namespace muduo;
@@ -44,7 +42,7 @@ Channel::~Channel()
   }
 }
 
-void Channel::tie(const boost::shared_ptr<void>& obj)
+void Channel::tie(const std::shared_ptr<void>& obj)
 {
   tie_ = obj;
   tied_ = true;
@@ -65,7 +63,7 @@ void Channel::remove()
 
 void Channel::handleEvent(Timestamp receiveTime)
 {
-  boost::shared_ptr<void> guard;
+  std::shared_ptr<void> guard;
   if (tied_)
   {
     guard = tie_.lock();
@@ -93,7 +91,7 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
     if (closeCallback_) closeCallback_();
   }
 
-  if (revents_ & POLLNVAL)
+  if (revents_ & POLLNVAL) // Invalid requests: fd not open (output only)
   {
     LOG_WARN << "fd = " << fd_ << " Channel::handle_event() POLLNVAL";
   }

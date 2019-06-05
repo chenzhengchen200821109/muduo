@@ -12,7 +12,6 @@
 #include <muduo/net/Channel.h>
 #include <muduo/net/EventLoop.h>
 #include <muduo/net/SocketsOps.h>
-#include <boost/bind.hpp>
 #include <errno.h>
 
 using namespace muduo;
