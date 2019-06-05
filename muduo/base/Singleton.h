@@ -18,6 +18,10 @@ namespace detail
 {
 // This doesn't detect inherited member functions!
 // http://stackoverflow.com/questions/1966362/sfinae-to-check-for-inherited-member-functions
+// SFINAE : Substitution Failure Is Not An Error.
+// https://en.cppreference.com/w/cpp/language/sfinae 
+// http://jguegant.github.io/blogs/tech/sfinae-introduction.html
+// The following code is very tricky!!!
 template<typename T>
 struct has_no_destroy
 {

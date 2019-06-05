@@ -1,29 +1,31 @@
 #include <muduo/base/BlockingQueue.h>
 #include <muduo/base/CountDownLatch.h>
 #include <muduo/base/Thread.h>
-
-#include <boost/bind.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <functional>
+#include <vector>
 #include <memory>
+#include <algorithm>
+#include <utility>
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
+#include <iostream>
 
 class Test
 {
  public:
   Test(int numThreads)
-    : latch_(numThreads),
-      threads_(numThreads)
+    : latch_(numThreads)
+    //, threads_(numThreads) cause Segment fault at runtime but don't know why 
   {
     for (int i = 0; i < numThreads; ++i)
     {
       char name[32];
       snprintf(name, sizeof name, "work thread %d", i);
-      threads_.push_back(new muduo::Thread(
-            boost::bind(&Test::threadFunc, this), muduo::string(name)));
+      threads_.push_back(std::move(std::unique_ptr<muduo::Thread>(new muduo::Thread(
+            std::bind(&Test::threadFunc, this), muduo::string(name)))));
     }
-    for_each(threads_.begin(), threads_.end(), boost::bind(&muduo::Thread::start, _1));
+    for_each(threads_.begin(), threads_.end(), std::bind(&muduo::Thread::start, std::placeholders::_1));
   }
 
   void run(int times)
@@ -47,7 +49,7 @@ class Test
       queue_.put("stop");
     }
 
-    for_each(threads_.begin(), threads_.end(), boost::bind(&muduo::Thread::join, _1));
+    for_each(threads_.begin(), threads_.end(), std::bind(&muduo::Thread::join, std::placeholders::_1));
   }
 
  private:
@@ -71,18 +73,14 @@ class Test
            muduo::CurrentThread::tid(),
            muduo::CurrentThread::name());
   }
-
+ private:
   muduo::BlockingQueue<std::string> queue_;
   muduo::CountDownLatch latch_;
-  boost::ptr_vector<muduo::Thread> threads_;
+  std::vector<std::unique_ptr<muduo::Thread>> threads_;
 };
 
 void testMove()
 {
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-
-// std::unique_ptr requires gcc 4.4 or later
-#if __GNUC_PREREQ (4,4)
   muduo::BlockingQueue<std::unique_ptr<int>> queue;
   queue.put(std::unique_ptr<int>(new int(42)));
   std::unique_ptr<int> x = queue.take();
@@ -91,9 +89,6 @@ void testMove()
   queue.put(std::move(x));
   std::unique_ptr<int> y = queue.take();
   printf("took %d\n", *y);
-#endif
-
-#endif
 }
 
 int main()

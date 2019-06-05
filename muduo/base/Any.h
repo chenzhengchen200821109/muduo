@@ -1,8 +1,7 @@
 #ifndef MUDUO_BASE_ANY_H
 #define MUDUO_BASE_ANY_H
 
-reference:http://www.two-sdg.demon.co.uk/curbralan/papers/ValuedConversions.pdf 
-
+//reference:http://www.two-sdg.demon.co.uk/curbralan/papers/ValuedConversions.pdf 
 #include <algorithm>
 #include <typeinfo>
 #include <exception>
@@ -25,7 +24,7 @@ namespace muduo
             }
             const std::type_info& type_info() const
             {
-                return content ? content->type_info() : typeid(void);
+                return content ? content->type() : typeid(void);
             }
             Any& swap(Any& rhs)
             {
@@ -34,7 +33,8 @@ namespace muduo
             }
             Any& operator=(const Any& rhs)
             {
-                 return std::swap(any(rhs));
+                Any temp(rhs);
+                return swap(temp);
             }
             operator const void *() const
             {
@@ -51,12 +51,7 @@ namespace muduo
                 Any(rhs).swap(*this);
                 return *this;
             }
-            template<typename ValueType>
-            ValueType any_cast(const Any& operand)
-            {
-                const ValueType *result = operan.to_ptr<ValueType>();
-                return result ? *result : throw std::bad_cast();
-            }
+            // what for?
             template<typename ValueType>
             bool copy_to(ValueType& value) const
             {
@@ -66,9 +61,14 @@ namespace muduo
                 return copyable;
             }
             template<typename ValueType>
-            const ValueType* to_ptr() const
+            const ValueType* to_const_ptr() const
             {
                 return type_info() == typeid(ValueType) ? &static_cast<holder<ValueType> *>(content)->held : 0;
+            }
+            template<typename ValueType>
+            ValueType* to_ptr() const
+            {
+                return type_info() == typeid(ValueType) ? &(static_cast<holder<ValueType> *>(content))->held : 0;
             }
         private:
             class placeholder
@@ -79,6 +79,7 @@ namespace muduo
                     virtual const std::type_info& type() const = 0;
                     virtual placeholder* clone() const = 0;
             };
+            //holder contains the actual value we care about.
             template<typename ValueType>
             class holder : public placeholder
             {
@@ -99,8 +100,29 @@ namespace muduo
                     ValueType held;
             };
             placeholder* content;
-            
     };
+
+    template<typename ValueType>
+    ValueType any_cast(const Any& operand)
+    {
+        ValueType *result = operand.to_ptr<ValueType>();
+        return result ? *result : throw std::bad_cast();
+    }
+
+    template<typename ValueType>
+    const ValueType* any_cast(const Any* operand)
+    {
+        const ValueType* result = operand->to_const_ptr<ValueType>();
+        return result ? result : throw std::bad_cast();
+    }
+
+    template<typename ValueType>
+    ValueType* any_cast(Any* operand)
+    {
+        ValueType* result = operand->to_ptr<ValueType>();
+        return result ? result : throw std::bad_cast();
+    }
+
 } //namespace muduo 
 
 

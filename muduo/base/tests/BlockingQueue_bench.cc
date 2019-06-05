@@ -2,10 +2,11 @@
 #include <muduo/base/CountDownLatch.h>
 #include <muduo/base/Thread.h>
 #include <muduo/base/Timestamp.h>
-
-#include <boost/bind.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <functional>
+#include <memory>
+#include <vector>
 #include <map>
+#include <algorithm>
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
@@ -21,10 +22,10 @@ class Bench
     {
       char name[32];
       snprintf(name, sizeof name, "work thread %d", i);
-      threads_.push_back(new muduo::Thread(
-            boost::bind(&Bench::threadFunc, this), muduo::string(name)));
+      threads_.push_back(std::move(std::unique_ptr<muduo::Thread>(new muduo::Thread(
+            std::bind(&Bench::threadFunc, this), muduo::string(name)))));
     }
-    for_each(threads_.begin(), threads_.end(), boost::bind(&muduo::Thread::start, _1));
+    for_each(threads_.begin(), threads_.end(), std::bind(&muduo::Thread::start, std::placeholders::_1));
   }
 
   void run(int times)
@@ -47,7 +48,7 @@ class Bench
       queue_.put(muduo::Timestamp::invalid());
     }
 
-    for_each(threads_.begin(), threads_.end(), boost::bind(&muduo::Thread::join, _1));
+    for_each(threads_.begin(), threads_.end(), std::bind(&muduo::Thread::join, std::placeholders::_1));
   }
 
  private:
@@ -89,7 +90,7 @@ class Bench
 
   muduo::BlockingQueue<muduo::Timestamp> queue_;
   muduo::CountDownLatch latch_;
-  boost::ptr_vector<muduo::Thread> threads_;
+  std::vector<std::unique_ptr<muduo::Thread> > threads_;
 };
 
 int main(int argc, char* argv[])

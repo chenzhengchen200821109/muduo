@@ -52,17 +52,18 @@ class ThreadNameInitializer
   {
     muduo::CurrentThread::t_threadName = "main";
     CurrentThread::tid();
-    //
-    // int pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void));
-    // thre pthread_atfork() function shall declare fork handlers to be called before and
-    // after fork(), in the context of the thread that called the fork().
-    //
+    /*
+     * int pthread_atfork(void (*prepare)(void), void (*parent)(void), void (*child)(void));
+     *     the pthread_atfork() function shall declare fork handlers to be called before and
+     *     after fork(), in the context of the thread that called the fork().
+     */
     pthread_atfork(NULL, NULL, &afterFork);
   }
 };
 
 ThreadNameInitializer init;
 
+//
 struct ThreadData
 {
   typedef muduo::Thread::ThreadFunc ThreadFunc;
@@ -89,6 +90,17 @@ struct ThreadData
     latch_ = NULL;
 
     muduo::CurrentThread::t_threadName = name_.empty() ? "muduoThread" : name_.c_str();
+    /*
+     * int prctl(int option, unsigned long arg2, unsigned long arg3,
+     *            unsigned long arg4, unsigned long arg5)
+     *     PR_SET_NAME: set the name of the calling thread, using the value in 
+     *     the location  pointed  to  by  (char *)  arg2.  The name can be up to 16
+     *     bytes long, and should be null-terminated if it  contains  fewer
+     *     bytes.   This  is  the  same  attribute  that  can  be  set  via
+     *     pthread_setname_np(3) and retrieved using pthread_getname_np(3).
+     *     The      attribute      is      likewise      accessible     via
+     *     /proc/self/task/[tid]/comm, where tid is the name of the calling thread.
+     */                
     ::prctl(PR_SET_NAME, muduo::CurrentThread::t_threadName);
     try
     {
@@ -119,6 +131,9 @@ struct ThreadData
   }
 };
 
+/*
+ * thread's entry point.
+ */
 void* startThread(void* obj)
 {
   ThreadData* data = static_cast<ThreadData*>(obj);
@@ -127,8 +142,8 @@ void* startThread(void* obj)
   return NULL;
 }
 
-}
-}
+} //namespace CurrentThread 
+} //namespace muduo
 
 using namespace muduo;
 
@@ -168,7 +183,6 @@ Thread::Thread(const ThreadFunc& func, const string& n)
   setDefaultName();
 }
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
 Thread::Thread(ThreadFunc&& func, const string& n)
   : started_(false),
     joined_(false),
@@ -181,8 +195,6 @@ Thread::Thread(ThreadFunc&& func, const string& n)
   setDefaultName();
 }
 
-#endif
-
 Thread::~Thread()
 {
   if (started_ && !joined_)
@@ -193,7 +205,6 @@ Thread::~Thread()
 
 void Thread::setDefaultName()
 {
-  //int num = numCreated_.incrementAndGet();
   int num = std::atomic_fetch_add(&numCreated_, 1);
   if (name_.empty())
   {

@@ -22,9 +22,7 @@ class Thread : muduo::noncopyable
   typedef std::function<void ()> ThreadFunc;
 
   explicit Thread(const ThreadFunc&, const string& name = string());
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
   explicit Thread(ThreadFunc&&, const string& name = string());
-#endif
   ~Thread();
 
   void start();

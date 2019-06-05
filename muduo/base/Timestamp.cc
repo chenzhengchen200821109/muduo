@@ -1,19 +1,14 @@
 #include <muduo/base/Timestamp.h>
-
 #include <sys/time.h>
 #include <stdio.h>
-
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
-
 #include <inttypes.h>
-
-#include <boost/static_assert.hpp>
 
 using namespace muduo;
 
-BOOST_STATIC_ASSERT(sizeof(Timestamp) == sizeof(int64_t));
+static_assert(sizeof(Timestamp) == sizeof(int64_t), " ");
 
 string Timestamp::toString() const
 {

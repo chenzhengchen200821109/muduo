@@ -1,12 +1,12 @@
 #include <muduo/base/BoundedBlockingQueue.h>
 #include <muduo/base/CountDownLatch.h>
 #include <muduo/base/Thread.h>
-
-#include <boost/bind.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-
+#include <utility>
+#include <algorithm>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -15,17 +15,17 @@ class Test
  public:
   Test(int numThreads)
     : queue_(20),
-      latch_(numThreads),
-      threads_(numThreads)
+      latch_(numThreads)
+    //,threads_(numThreads) see Blockingqueue_test.cc
   {
     for (int i = 0; i < numThreads; ++i)
     {
       char name[32];
       snprintf(name, sizeof name, "work thread %d", i);
-      threads_.push_back(new muduo::Thread(
-            boost::bind(&Test::threadFunc, this), muduo::string(name)));
+      std::unique_ptr<muduo::Thread> PtrThread(new muduo::Thread(std::bind(&Test::threadFunc, this), muduo::string(name)));
+      threads_.push_back(std::move(PtrThread));
     }
-    for_each(threads_.begin(), threads_.end(), boost::bind(&muduo::Thread::start, _1));
+    for_each(threads_.begin(), threads_.end(), std::bind(&muduo::Thread::start, std::placeholders::_1));
   }
 
   void run(int times)
@@ -49,7 +49,7 @@ class Test
       queue_.put("stop");
     }
 
-    for_each(threads_.begin(), threads_.end(), boost::bind(&muduo::Thread::join, _1));
+    for_each(threads_.begin(), threads_.end(), std::bind(&muduo::Thread::join, std::placeholders::_1));
   }
 
  private:
@@ -76,7 +76,7 @@ class Test
 
   muduo::BoundedBlockingQueue<std::string> queue_;
   muduo::CountDownLatch latch_;
-  boost::ptr_vector<muduo::Thread> threads_;
+  std::vector<std::unique_ptr<muduo::Thread>> threads_;
 };
 
 int main()

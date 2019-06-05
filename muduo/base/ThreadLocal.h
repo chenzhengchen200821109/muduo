@@ -7,15 +7,17 @@
 #define MUDUO_BASE_THREADLOCAL_H
 
 #include <muduo/base/Mutex.h>  // MCHECK
-
-#include <boost/noncopyable.hpp>
+#include <muduo/base/NonCopyable.h>
 #include <pthread.h>
 
 namespace muduo
 {
 
+/*
+ * Thread-specific data.
+ */
 template<typename T>
-class ThreadLocal : boost::noncopyable
+class ThreadLocal : muduo::noncopyable
 {
  public:
   ThreadLocal()

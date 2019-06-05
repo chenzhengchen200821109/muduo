@@ -1,8 +1,7 @@
 #include <muduo/base/Thread.h>
 #include <muduo/base/CurrentThread.h>
-
 #include <string>
-#include <boost/bind.hpp>
+#include <functional>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -59,32 +58,33 @@ int main()
   printf("t1.tid=%d\n", t1.tid());
   t1.join();
 
-  muduo::Thread t2(boost::bind(threadFunc2, 42),
+  muduo::Thread t2(std::bind(threadFunc2, 42),
                    "thread for free function with argument");
   t2.start();
   printf("t2.tid=%d\n", t2.tid());
   t2.join();
 
   Foo foo(87.53);
-  muduo::Thread t3(boost::bind(&Foo::memberFunc, &foo),
+  muduo::Thread t3(std::bind(&Foo::memberFunc, &foo),
                    "thread for member function without argument");
   t3.start();
   t3.join();
 
-  muduo::Thread t4(boost::bind(&Foo::memberFunc2, boost::ref(foo), std::string("Shuo Chen")));
+  // std::ref()
+  muduo::Thread t4(std::bind(&Foo::memberFunc2, std::ref(foo), std::string("Shuo Chen")));
   t4.start();
   t4.join();
 
   {
     muduo::Thread t5(threadFunc3);
     t5.start();
-    // t5 may destruct eariler than thread creation.
+    // t5 may destruct eariler than thread creation. Is this not a bug???
   }
   mysleep(2);
   {
     muduo::Thread t6(threadFunc3);
     t6.start();
-    mysleep(2);
+    mysleep(2); // give OS some time to schedule t6.
     // t6 destruct later than thread creation.
   }
   sleep(2);

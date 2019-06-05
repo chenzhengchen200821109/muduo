@@ -4,6 +4,9 @@ target_link_libraries(asynclogging_test muduo_base)
 add_executable(atomic_unittest Atomic_unittest.cc)
 add_test(NAME atomic_unittest COMMAND atomic_unittest)
 
+add_executable(any_test Any_test.cc)
+target_link_libraries(any_test muduo_base)
+
 add_executable(blockingqueue_test BlockingQueue_test.cc)
 target_link_libraries(blockingqueue_test muduo_base)
 

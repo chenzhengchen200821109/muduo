@@ -6,7 +6,7 @@
 #ifndef MUDUO_BASE_THREADLOCALSINGLETON_H
 #define MUDUO_BASE_THREADLOCALSINGLETON_H
 
-#include <boost/noncopyable.hpp>
+#include <muduo/base/NonCopyable.h>
 #include <assert.h>
 #include <pthread.h>
 
@@ -14,10 +14,11 @@ namespace muduo
 {
 
 template<typename T>
-class ThreadLocalSingleton : boost::noncopyable
+class ThreadLocalSingleton : muduo::noncopyable
 {
  public:
 
+  //once instantiated, return the same memory address each time.  
   static T& instance()
   {
     if (!t_value_)
@@ -51,6 +52,15 @@ class ThreadLocalSingleton : boost::noncopyable
    public:
     Deleter()
     {
+      /*
+       * int pthread_key_create(pthread_key_t *key, void (*destructor)(void*));
+       *     The pthread_key_create() function shall create a thread-specific data  
+       *     key visible to all threads in the process. Key values provided by 
+       *     pthread_key_create() are opaque objects used to locate thread-specific data. 
+       *     Although the same key value may be used by different threads, the values bound 
+       *     to the key by pthread_setspecific() are maintained on a per-thread basis and 
+       *     persist for the life of the calling thread.
+       */     
       pthread_key_create(&pkey_, &ThreadLocalSingleton::destructor);
     }
 

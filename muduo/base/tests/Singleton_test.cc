@@ -1,11 +1,10 @@
 #include <muduo/base/Singleton.h>
 #include <muduo/base/CurrentThread.h>
 #include <muduo/base/Thread.h>
-
-#include <boost/noncopyable.hpp>
+#include <muduo/base/NonCopyable.h>
 #include <stdio.h>
 
-class Test : boost::noncopyable
+class Test : muduo::noncopyable
 {
  public:
   Test()
@@ -25,11 +24,11 @@ class Test : boost::noncopyable
   muduo::string name_;
 };
 
-class TestNoDestroy : boost::noncopyable
+class TestNoDestroy : muduo::noncopyable
 {
  public:
   // Tag member for Singleton<T>
-  void no_destroy();
+  void no_destroy(); // if we don't declare this member function, then descontructor will be called.
 
   TestNoDestroy()
   {
