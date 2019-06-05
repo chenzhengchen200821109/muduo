@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
+#set(CMAAKE_CXX_COMPILER "g++83")
+
 project(muduo C CXX)
 
 enable_testing()
